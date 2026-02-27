@@ -825,6 +825,16 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
 </script>
 </body>
 </html>
