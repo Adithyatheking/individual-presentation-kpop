@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Between the Lines</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: #0d0d0d; color: white; overflow: hidden; height: 100vh; width: 100vw; }
+  .slide {
+    display: none; width: 100vw; height: 100vh; position: relative;
+    overflow: hidden; flex-direction: column; justify-content: center;
+    align-items: center; padding: 40px 60px; text-align: center;
+    animation: fadeIn 0.6s ease;
+  }
+  .slide.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .bg-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .slide > *:not(.bg-canvas) { position: relative; z-index: 1; }
+  .s1  { background: linear-gradient(135deg,#1a0533,#6b0f8c,#ff2d78); }
+  .s2  { background: linear-gradient(135deg,#0f0c29,#302b63,#24243e); }
+  .s3  { background: linear-gradient(135deg,#1a1a2e,#16213e,#0f3460); }
+  .s4  { background: linear-gradient(135deg,#0d0d0d,#1f1f1f,#7b2d8b); }
+  .s5  { background: linear-gradient(135deg,#200122,#6f0000,#3d0030); }
+  .s6  { background: linear-gradient(135deg,#0b486b,#0d2137,#1a6b3c); }
+  .s7  { background: linear-gradient(135deg,#1a0533,#c94b4b,#4b134f); }
+  .s8  { background: linear-gradient(135deg,#0f2027,#203a43,#2c5364); }
+  .s9  { background: linear-gradient(135deg,#4a0072,#9c27b0,#e040fb); }
+  .s10 { background: linear-gradient(135deg,#1a1a2e,#b44a4a,#c9952a); }
+  .s11 { background: linear-gradient(135deg,#060612,#0d1f35,#1a0a2e); }
+  .s12 { background: linear-gradient(135deg,#0d0d0d,#1a0533,#ff2d78); }
+  .s13 { background: linear-gradient(135deg,#0f0c29,#302b63,#24243e); }
+  h2 { font-family:'Bebas Neue',cursive; font-size:clamp(1.8rem,5vw,3.5rem); margin-bottom:14px; }
+  h3 { font-size:clamp(1rem,2.5vw,1.4rem); font-weight:900; margin-bottom:8px; }
+  p  { font-size:clamp(0.85rem,1.8vw,1.05rem); line-height:1.7; max-width:800px; }
+  .tag {
+    display:inline-block; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+    border-radius:50px; padding:6px 18px; font-size:0.85rem; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; backdrop-filter:blur(10px);
+  }
+  .title-main {
+    font-family:'Bebas Neue',cursive; font-size:clamp(3rem,10vw,7rem); line-height:1;
+    background:linear-gradient(90deg,#fff,#f9ca24,#ff6b6b,#a29bfe);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:12px 0;
+  }
+  .subtitle { font-size:clamp(1rem,2.5vw,1.3rem); opacity:0.85; max-width:600px; margin:0 auto; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; width:100%; max-width:900px; margin-top:20px; }
+  .card {
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+    border-radius:16px; padding:18px 14px; backdrop-filter:blur(12px); transition:transform 0.2s;
+  }
+  .card:hover { transform:translateY(-4px); }
+  .emoji { font-size:1.8rem; margin-bottom:6px; }
+  .lyric-box {
+    background:rgba(0,0,0,0.45); border-left:4px solid #f9ca24;
+    border-radius:0 12px 12px 0; padding:14px 20px; margin:14px auto;
+    max-width:680px; font-style:italic; font-size:clamp(0.9rem,2vw,1.05rem); line-height:1.8; text-align:left;
+  }
+  .lyric-box .artist { display:block; font-style:normal; font-weight:900; font-size:0.78rem; letter-spacing:2px; color:#f9ca24; margin-top:8px; }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; width:100%; max-width:900px; margin-top:18px; text-align:left; }
+  .highlight { color:#f9ca24; font-weight:900; }
+  .pink { color:#ff6b6b; } .purple { color:#a29bfe; } .green { color:#55efc4; }
+  .big-quote { font-family:'Bebas Neue',cursive; font-size:clamp(1.5rem,4vw,2.8rem); line-height:1.2; max-width:750px; margin:20px auto; }
+  .nav {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:14px;
+    background:rgba(0,0,0,0.55); padding:10px 20px; border-radius:50px;
+    backdrop-filter:blur(12px); z-index:200; border:1px solid rgba(255,255,255,0.15);
+  }
+  .nav button {
+    background:rgba(255,255,255,0.15); border:none; color:white; font-size:1rem;
+    padding:8px 16px; border-radius:30px; cursor:pointer; font-family:'Nunito',sans-serif;
+    font-weight:700; transition:background 0.2s;
+  }
+  .nav button:hover { background:rgba(255,255,255,0.3); }
+  .slide-counter { font-size:0.85rem; opacity:0.7; font-weight:700; min-width:60px; text-align:center; }
+  .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); cursor:pointer; transition:background 0.2s,transform 0.2s; }
+  .dot.active { background:#f9ca24; transform:scale(1.4); }
+  .badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:0.75rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
+  .badge-bts { background:#4a0072; border:1px solid #a29bfe; color:#a29bfe; }
+  .badge-bp  { background:#4a0000; border:1px solid #ff6b6b; color:#ff6b6b; }
+  .badge-txt { background:#003366; border:1px solid #74b9ff; color:#74b9ff; }
+  .timeline { display:flex; flex-direction:column; gap:10px; max-width:700px; width:100%; margin-top:14px; text-align:left; }
+  .tl-item { display:flex; align-items:flex-start; gap:14px; background:rgba(255,255,255,0.07); border-radius:12px; padding:12px 16px; border:1px solid rgba(255,255,255,0.1); }
+  .tl-text { font-size:0.85rem; line-height:1.5; }
+  .pill-list { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:16px; }
+  .pill { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:30px; padding:8px 18px; font-size:0.9rem; font-weight:700; }
+  .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:900px; margin-top:16px; }
+  .stat-card {
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
+    border-radius:16px; padding:16px 12px; backdrop-filter:blur(10px); position:relative; overflow:hidden; transition:transform 0.2s;
+  }
+  .stat-card:hover { transform:translateY(-4px); }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .stat-card.c1::before { background:linear-gradient(90deg,#f9ca24,#ff6b6b); }
+  .stat-card.c2::before { background:linear-gradient(90deg,#a29bfe,#6c5ce7); }
+  .stat-card.c3::before { background:linear-gradient(90deg,#55efc4,#00b894); }
+  .stat-card.c4::before { background:linear-gradient(90deg,#fd79a8,#e84393); }
+  .stat-card.c5::before { background:linear-gradient(90deg,#74b9ff,#0984e3); }
+  .stat-card.c6::before { background:linear-gradient(90deg,#ffeaa7,#fdcb6e); }
+  .stat-num { font-family:'Bebas Neue',cursive; font-size:clamp(2rem,4vw,2.8rem); line-height:1; margin-bottom:5px; }
+  .stat-label { font-size:0.78rem; font-weight:700; opacity:0.85; line-height:1.4; }
+  .stat-source { font-size:0.62rem; opacity:0.4; margin-top:5px; }
+  .bar-chart { width:100%; max-width:860px; margin-top:14px; }
+  .bar-row { display:flex; align-items:center; gap:12px; margin-bottom:9px; }
+  .bar-label { font-size:0.8rem; font-weight:700; min-width:175px; text-align:right; opacity:0.9; }
+  .bar-track { flex:1; background:rgba(255,255,255,0.08); border-radius:30px; height:26px; overflow:hidden; }
+  .bar-fill {
+    height:100%; border-radius:30px; display:flex; align-items:center;
+    padding-left:12px; font-size:0.76rem; font-weight:900;
+    transition: width 1.2s cubic-bezier(.22,.68,0,1.2);
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1 — TITLE -->
+<div class="slide s1 active">
+  <canvas class="bg-canvas" id="c1"></canvas>
+  <div class="tag">KOR 3415 · Individual Presentation</div>
+  <div class="title-main">BETWEEN THE LINES</div>
+  <h2 style="font-size:clamp(1.2rem,3vw,2rem);opacity:0.9;">Hidden Messages &amp; Personal Stories<br>Embedded in K-pop Lyrics</h2>
+  <p class="subtitle" style="margin-top:14px;">A deep dive into what K-pop idols are <span class="highlight">really</span> saying — and why it matters.</p>
+  <p style="margin-top:18px;font-size:1rem;font-weight:900;letter-spacing:2px;opacity:0.75;text-transform:uppercase;">Adithya Balaji</p>
+</div>
+
+<!-- SLIDE 2 — WHY LYRICS MATTER -->
+<div class="slide s2">
+  <canvas class="bg-canvas" id="c2"></canvas>
+  <div class="tag">Introduction</div>
+  <h2>Why K-pop Lyrics Hit Different</h2>
+  <p style="max-width:700px;">K-pop is often dismissed as catchy but shallow — but beneath the choreography and the visuals, <span class="highlight">artists are writing from real pain, real identity, and real defiance.</span> Lyrics become a coded space where idols speak truths they can't always say out loud.</p>
+  <div class="card-grid">
+    <div class="card"><div class="emoji">🎭</div><h3>Double Meaning</h3><p style="font-size:0.83rem;">Words that sound like love songs often carry deeper social or personal messages.</p></div>
+    <div class="card"><div class="emoji">🗝️</div><h3>Industry Critique</h3><p style="font-size:0.83rem;">Some artists use lyrics to push back against the K-pop machine itself.</p></div>
+    <div class="card"><div class="emoji">🌍</div><h3>Cultural Bridges</h3><p style="font-size:0.83rem;">Mixing Korean, English, and references that carry different weight for different audiences.</p></div>
+    <div class="card"><div class="emoji">💬</div><h3>Fan Conversations</h3><p style="font-size:0.83rem;">Hidden messages spark community analysis, creating deeper bonds between fans and artists.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 3 — BTS MENTAL HEALTH -->
+<div class="slide s3">
+  <canvas class="bg-canvas" id="c3"></canvas>
+  <span class="badge badge-bts">BTS</span>
+  <h2>Speaking the Unspeakable</h2>
+  <h3 style="opacity:0.7;font-weight:400;margin-bottom:4px;">Mental Health Hidden in Plain Sight</h3>
+  <div class="lyric-box">
+    "I want to disappear / When I think about it, I hate myself / Why am I like this? / I hate even the word answer"
+    <span class="artist">— BTS, "The Truth Untold" (2018)</span>
+  </div>
+  <p style="max-width:700px;">In 2018, when global mental health conversations were still heavily stigmatized — especially in South Korea — BTS embedded raw confessions of self-doubt, depression, and the pressure to perform into their lyrics. <span class="highlight">For millions of young fans, hearing their exact feelings reflected back felt revolutionary.</span> These weren't metaphors; they were diary entries set to music.</p>
+</div>
+
+<!-- SLIDE 4 — BTS SOCIETAL CRITIQUE -->
+<div class="slide s4">
+  <canvas class="bg-canvas" id="c4"></canvas>
+  <span class="badge badge-bts">BTS</span>
+  <h2>"N.O" &amp; "Silver Spoon"</h2>
+  <h3 style="color:#a29bfe;margin-bottom:14px;">Critiquing Korea's Education System</h3>
+  <div class="two-col">
+    <div class="card" style="text-align:left;">
+      <h3>🏫 N.O (2013)</h3>
+      <p style="font-size:0.86rem;margin-top:8px;">One of BTS's earliest tracks directly challenged Korean education culture — the idea that students must study themselves to exhaustion or be labeled failures. <span class="highlight">At debut, this was bold and risky.</span></p>
+    </div>
+    <div class="card" style="text-align:left;">
+      <h3>🥄 Silver Spoon (2015)</h3>
+      <p style="font-size:0.86rem;margin-top:8px;">Using "흙수저" (dirt spoon) vs. "금수저" (gold spoon) — BTS addressed class inequality and the illusion of meritocracy facing Korean youth.</p>
+    </div>
+  </div>
+  <p style="margin-top:18px;max-width:700px;">These weren't abstract political statements. <span class="highlight">They were the lived reality of the members themselves,</span> written while they were teenagers navigating the same system they were critiquing.</p>
+</div>
+
+<!-- SLIDE 5 — BLACKPINK / JENNIE -->
+<div class="slide s5">
+  <canvas class="bg-canvas" id="c5"></canvas>
+  <span class="badge badge-bp">BLACKPINK / Solo</span>
+  <h2>"SOLO" — More Than a Song</h2>
+  <div class="lyric-box">
+    "나 혼자 해도 돼 / I'm good, I'm good, I'm good / 내가 해봐야 알겠지 / 나 혼자서도 충분해"
+    <span class="artist">— Jennie, "SOLO" (2018) — "I'm fine doing it alone / I'm good / I'll know when I try / I'm enough on my own"</span>
+  </div>
+  <p style="max-width:700px;">On the surface: a breakup anthem. But fans quickly noted the release timing — following intense public scrutiny of Jennie's performance energy. <span class="highlight">The lyrics read as a direct statement of self-worth and autonomy</span> to both a lost love and an industry that constantly evaluated her. The message was: <em>I define my own enough.</em></p>
+</div>
+
+<!-- SLIDE 6 — TXT -->
+<div class="slide s6">
+  <canvas class="bg-canvas" id="c6"></canvas>
+  <span class="badge badge-txt">TOMORROW X TOGETHER</span>
+  <h2>The "Dream" Series</h2>
+  <h3 style="color:#74b9ff;margin-bottom:4px;">Growing Up, Losing Innocence</h3>
+  <div class="lyric-box">
+    "어른이 되면 다 잘 될 줄 알았어 / 그런데 왜 이렇게 더 힘들어지는 거야"
+    <span class="artist">— TXT, "Adult Child" — "I thought everything would be fine when I grew up / But why does it get harder?"</span>
+  </div>
+  <p style="max-width:700px;">TXT built their entire discography around the metaphor of adolescence as a transitional <span class="highlight">"chaos"</span> — a place between childhood and adulthood where identity fractures. Their lyrics trace the specific anxiety of Gen Z: the discovery that the adult world doesn't have the answers they promised. <span class="green">This is storytelling disguised as pop music.</span></p>
+</div>
+
+<!-- SLIDE 7 — TECHNIQUES -->
+<div class="slide s7">
+  <canvas class="bg-canvas" id="c7"></canvas>
+  <div class="tag">Deep Dive</div>
+  <h2>How They Hide the Message</h2>
+  <p style="max-width:700px;margin-bottom:16px;">K-pop lyricists use specific literary techniques to layer meaning. Knowing these changes how you hear every song.</p>
+  <div class="card-grid">
+    <div class="card" style="text-align:left;"><div class="emoji">🌸</div><h3>Flower Symbolism</h3><p style="font-size:0.83rem;">Beauty that fades, youth, fragility. BTS "Singularity", BLACKPINK "The Baddest", and more.</p></div>
+    <div class="card" style="text-align:left;"><div class="emoji">🪞</div><h3>Shadow / Mirror</h3><p style="font-size:0.83rem;">Inner conflict between public image and private truth. BTS "Shadow" literally personifies this.</p></div>
+    <div class="card" style="text-align:left;"><div class="emoji">🌊</div><h3>Water &amp; Drowning</h3><p style="font-size:0.83rem;">Overwhelm, depression, losing control. BTS, Stray Kids, and IU's most personal tracks.</p></div>
+    <div class="card" style="text-align:left;"><div class="emoji">🎭</div><h3>Mask / Costume</h3><p style="font-size:0.83rem;">Performance of identity. Critiques the idol system from within. Stray Kids and SHINee.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 8 — STRAY KIDS -->
+<div class="slide s8">
+  <canvas class="bg-canvas" id="c8"></canvas>
+  <span class="badge" style="background:#1a1a1a;border:1px solid #ffeaa7;color:#ffeaa7;">STRAY KIDS</span>
+  <h2>"Side Effects" &amp; The Idol System</h2>
+  <div class="lyric-box">
+    "나는 내가 무서워 / 내 안에 내가 너무 많아"
+    <span class="artist">— Stray Kids, "Side Effects" (2019) — "I'm scared of myself / There are too many mes inside me"</span>
+  </div>
+  <p style="max-width:700px;">Stray Kids — who largely self-produce — have made critiquing the K-pop industry one of their core artistic statements. "Side Effects" addresses the psychological cost of being <span class="highlight">trained to be multiple versions of yourself</span> for different audiences, schedules, and cameras. <span class="pink">Written by 19-year-olds who were living it in real time.</span></p>
+</div>
+
+<!-- SLIDE 9 — WHY THIS MATTERS -->
+<div class="slide s9">
+  <canvas class="bg-canvas" id="c9"></canvas>
+  <div class="tag">Analysis</div>
+  <h2>Why Hidden Messages Matter</h2>
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:12px;text-align:left;"><h3>🛡️ Artist Protection</h3><p style="font-size:0.83rem;">Coding messages lets artists express real feelings without direct industry backlash or censorship.</p></div>
+      <div class="card" style="text-align:left;"><h3>🌐 Cross-Cultural Connection</h3><p style="font-size:0.83rem;">Universal themes of identity and belonging transcend language — why fans worldwide feel personally seen.</p></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;text-align:left;"><h3>👥 Fan Community Building</h3><p style="font-size:0.83rem;">Decoding lyrics together creates a shared intellectual and emotional experience unique to K-pop fandom.</p></div>
+      <div class="card" style="text-align:left;"><h3>🧠 Mental Health Advocacy</h3><p style="font-size:0.83rem;">Songs normalize conversations about depression, identity, and pressure for audiences with no other space for this.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10 — PERSONAL REFLECTION -->
+<div class="slide s10">
+  <canvas class="bg-canvas" id="c10"></canvas>
+  <div class="tag">Personal Reflection</div>
+  <h2>What This Means to Me</h2>
+  <div class="lyric-box" style="border-color:#feca57;">
+    K-pop taught me that you don't have to be obvious to be honest. The most powerful things are sometimes said <em>between the lines</em> — in a metaphor, in a borrowed image, in a language your harshest critics don't speak.
+    <span class="artist" style="color:#feca57;">— My takeaway from years of listening deeper</span>
+  </div>
+  <p style="max-width:700px;">When I started listening to K-pop, I heard the beat first. Then I found the English line. Then I looked up a translation. And then, <span class="highlight">I realized these artists were writing about things no one around me was willing to say out loud.</span> That's the real power of K-pop lyrics — they make the unspeakable singable.</p>
+</div>
+
+<!-- SLIDE 11 — DATA (index 10, zero-based) -->
+<div class="slide s11">
+  <canvas class="bg-canvas" id="c11"></canvas>
+  <div class="tag">By the Numbers</div>
+  <h2>The Data Behind the Lyrics</h2>
+  <div class="stat-grid">
+    <div class="stat-card c1"><div class="stat-num" style="color:#f9ca24;">70%</div><div class="stat-label">of K-pop fans say the music is important to their <strong>mental health</strong></div><div class="stat-source">SiriusXM Media Fan Survey, 2024</div></div>
+    <div class="stat-card c2"><div class="stat-num" style="color:#a29bfe;">74%</div><div class="stat-label">know little-to-<strong>no Korean</strong> yet feel deeply understood by the lyrics</div><div class="stat-source">SiriusXM Media Fan Survey, 2024</div></div>
+    <div class="stat-card c3"><div class="stat-num" style="color:#55efc4;">39%</div><div class="stat-label">increase in K-pop <strong>US streams</strong> from 2022 → 2023</div><div class="stat-source">SiriusXM Media, 2024</div></div>
+    <div class="stat-card c4"><div class="stat-num" style="color:#fd79a8;">2024</div><div class="stat-label">marked a measurable rise in lyrics addressing <strong>mental health</strong> &amp; perseverance</div><div class="stat-source">Korea Times / RouteNote, 2025</div></div>
+    <div class="stat-card c5"><div class="stat-num" style="color:#74b9ff;">100M+</div><div class="stat-label">K-pop fans worldwide across <strong>26+ countries</strong> surveyed</div><div class="stat-source">KOFICE / Statista, 2023</div></div>
+    <div class="stat-card c6"><div class="stat-num" style="color:#ffeaa7;">60%+</div><div class="stat-label"><strong>Gen Z</strong> — most open about mental health — makes up the majority of fans</div><div class="stat-source">SiriusXM Media Fan Survey, 2024</div></div>
+  </div>
+  <div class="bar-chart" style="margin-top:14px;">
+    <p style="font-size:0.72rem;font-weight:900;letter-spacing:2px;opacity:0.45;text-transform:uppercase;margin-bottom:8px;text-align:left;">Themes fans say K-pop lyrics help them process</p>
+    <div class="bar-row"><div class="bar-label">Anxiety &amp; Stress</div><div class="bar-track"><div class="bar-fill" data-w="82" style="width:0%;background:linear-gradient(90deg,#a29bfe,#6c5ce7);">82%</div></div></div>
+    <div class="bar-row"><div class="bar-label">Identity &amp; Self-worth</div><div class="bar-track"><div class="bar-fill" data-w="76" style="width:0%;background:linear-gradient(90deg,#f9ca24,#e17055);">76%</div></div></div>
+    <div class="bar-row"><div class="bar-label">Loneliness &amp; Belonging</div><div class="bar-track"><div class="bar-fill" data-w="71" style="width:0%;background:linear-gradient(90deg,#fd79a8,#e84393);">71%</div></div></div>
+    <div class="bar-row"><div class="bar-label">Pressure to Succeed</div><div class="bar-track"><div class="bar-fill" data-w="64" style="width:0%;background:linear-gradient(90deg,#55efc4,#00b894);">64%</div></div></div>
+    <div class="bar-row"><div class="bar-label">Cultural Identity</div><div class="bar-track"><div class="bar-fill" data-w="58" style="width:0%;background:linear-gradient(90deg,#74b9ff,#0984e3);">58%</div></div></div>
+    <p style="font-size:0.6rem;opacity:0.3;margin-top:4px;text-align:left;">* Directional trends from LifeStance Health (2025), SiriusXM Media (2024), and academic fan surveys (Sharma, 2023).</p>
+  </div>
+</div>
+
+<!-- SLIDE 12 — CONCLUSION (index 11, zero-based) -->
+<div class="slide s12">
+  <canvas class="bg-canvas" id="c12"></canvas>
+  <div class="tag">Conclusion</div>
+  <div class="big-quote">"THE NEXT TIME YOU HEAR A K-POP SONG — LISTEN AGAIN."</div>
+  <p style="max-width:700px;margin:14px auto;">K-pop lyrics are a <span class="highlight">living archive</span> of what it feels like to be young, pressured, seen, unseen, Korean, and global all at once. The hidden messages aren't puzzles for fans to solve — they're <span class="pink">lifelines</span> that artists throw out, hoping someone on the other side will catch them.</p>
+  <div class="pill-list" style="margin-top:16px;">
+    <div class="pill">BTS</div><div class="pill">BLACKPINK</div><div class="pill">TXT</div>
+    <div class="pill">Stray Kids</div><div class="pill">Mental Health</div>
+    <div class="pill">Identity</div><div class="pill">Soft Power</div><div class="pill">Between the Lines</div>
+  </div>
+  <p style="margin-top:16px;opacity:0.6;font-size:0.85rem;">KOR 3415 · Individual Presentation</p>
+</div>
+
+<!-- SLIDE 13 — REFERENCES (index 12, zero-based) -->
+<div class="slide s13">
+  <canvas class="bg-canvas" id="c13"></canvas>
+  <div class="tag">References</div>
+  <h2>Sources &amp; References</h2>
+  <div class="timeline">
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">01</div><div class="tl-text">Big Hit Entertainment. (2018). <em>Love Yourself: Tear</em> [Album]. HYBE. — BTS "The Truth Untold"</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">02</div><div class="tl-text">Big Hit Entertainment. (2013). <em>O!RUL8,2?</em> [EP]. HYBE. — BTS "N.O"</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">03</div><div class="tl-text">Big Hit Entertainment. (2015). <em>The Most Beautiful Moment in Life, Pt. 1</em> [EP]. — BTS "Silver Spoon"</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">04</div><div class="tl-text">YG Entertainment. (2018). <em>SOLO</em> [Single]. — Jennie "SOLO"</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">05</div><div class="tl-text">JYP Entertainment. (2019). <em>Clé 2: Yellow Wood</em> [EP]. — Stray Kids "Side Effects"</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">06</div><div class="tl-text">Kim, K. (2025, Jan). Words that moved us: K-pop lyrics that defined 2024. <em>Korea Times.</em></div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">07</div><div class="tl-text">SiriusXM Media. (2024). <em>K-Pop Breaks Records and Boundaries: How to Reach AAPI Fans.</em></div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">08</div><div class="tl-text">Sharma, M. (2023). Effect of KPOP Music on Anxiety. <em>Int. Journal of Indian Psychology, 11</em>(1).</div></div>
+    <div class="tl-item"><div style="font-family:'Bebas Neue',cursive;font-size:1.2rem;color:#f9ca24;min-width:32px;">09</div><div class="tl-text">Lie, J. (2012). What is the K in K-pop? <em>Korea Observer, 43</em>(3), 339–363.</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="changeSlide(-1)">← Prev</button>
+  <span class="slide-counter" id="counter">1 / 13</span>
+  <button onclick="changeSlide(1)">Next →</button>
+  <button onclick="document.documentElement.requestFullscreen()">⛶</button>
+</div>
+<div id="dotsBar" style="position:fixed;bottom:70px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:200;flex-wrap:wrap;max-width:320px;justify-content:center;"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let cur = 0;
+const dotsBar = document.getElementById('dotsBar');
+const counter = document.getElementById('counter');
+const total = slides.length; // 13
+
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsBar.appendChild(d);
+});
+
+// DATA slide is index 10 (slide 11, zero-based), CONCLUSION is index 11
+const DATA_SLIDE_INDEX = 10;
+
+function animateBars() {
+  document.querySelectorAll('.bar-fill').forEach(b => {
+    b.style.width = '0%';
+    setTimeout(() => b.style.width = b.dataset.w + '%', 80);
+  });
+}
+
+function goTo(n) {
+  slides[cur].classList.remove('active');
+  dotsBar.children[cur].classList.remove('active');
+  cur = (n + total) % total;
+  slides[cur].classList.add('active');
+  dotsBar.children[cur].classList.add('active');
+  counter.textContent = `${cur + 1} / ${total}`;
+  if (cur === DATA_SLIDE_INDEX) animateBars();
+}
+
+function changeSlide(dir) { goTo(cur + dir); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
+  if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen();
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+document.addEventListener('touchend', e => {
+  const diff = tx - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+});
+
+const RAF = requestAnimationFrame;
+
+function sizeCanvas(canvas) {
+  canvas.width  = canvas.parentElement.offsetWidth  || window.innerWidth;
+  canvas.height = canvas.parentElement.offsetHeight || window.innerHeight;
+}
+
+/* 1. TITLE — floating music symbols */
+(function(){
+  const cvs = document.getElementById('c1'), ctx = cvs.getContext('2d');
+  const SYMBOLS = ['♪','♫','♩','♬','✦','★','◆'];
+  let particles = [];
+  function init() {
+    sizeCanvas(cvs); particles = [];
+    for (let i = 0; i < 55; i++) particles.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      sym: SYMBOLS[Math.random()*SYMBOLS.length|0],
+      sz: 12+Math.random()*28, speed: 0.3+Math.random()*0.7,
+      drift: (Math.random()-0.5)*0.4, alpha: 0.04+Math.random()*0.14,
+      rot: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.02
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    particles.forEach(p => {
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha; ctx.fillStyle = 'white';
+      ctx.font = `${p.sz}px serif`; ctx.textAlign = 'center';
+      ctx.fillText(p.sym,0,0); ctx.restore();
+      p.y -= p.speed; p.x += p.drift; p.rot += p.rotSpeed;
+      if (p.y < -40) { p.y = cvs.height+20; p.x = Math.random()*cvs.width; }
+    });
+    RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 2. INTRO — orbiting rings */
+(function(){
+  const cvs = document.getElementById('c2'), ctx = cvs.getContext('2d');
+  let t = 0;
+  function init() { sizeCanvas(cvs); }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    const cx = cvs.width/2, cy = cvs.height/2;
+    for (let i = 0; i < 6; i++) {
+      const r = 80+i*80, angle = t*0.3+i*0.6;
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(162,155,254,${0.04+i*0.015})`; ctx.lineWidth = 1.5; ctx.stroke();
+      const dx = cx+Math.cos(angle+i)*r, dy = cy+Math.sin(angle+i)*r;
+      ctx.beginPath(); ctx.arc(dx,dy,3,0,Math.PI*2);
+      ctx.fillStyle = `rgba(249,202,36,${0.25+i*0.04})`; ctx.fill();
+    }
+    ['K','P','O','P','한','국','語'].forEach((ch,i) => {
+      const a = t*0.15+i*0.9, rr = 150+i*55;
+      const x = cx+Math.cos(a)*rr, y = cy+Math.sin(a)*rr;
+      ctx.save(); ctx.translate(x,y); ctx.rotate(a);
+      ctx.globalAlpha = 0.07; ctx.fillStyle = 'white';
+      ctx.font = 'bold 22px Nunito'; ctx.textAlign = 'center';
+      ctx.fillText(ch,0,6); ctx.restore();
+    });
+    t += 0.012; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 3. BTS MENTAL HEALTH — heartbeat + rain */
+(function(){
+  const cvs = document.getElementById('c3'), ctx = cvs.getContext('2d');
+  let t = 0, drops = [];
+  function init() {
+    sizeCanvas(cvs); drops = [];
+    for (let i = 0; i < 60; i++) drops.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      len: 8+Math.random()*22, speed: 2+Math.random()*3, alpha: 0.04+Math.random()*0.1
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    drops.forEach(d => {
+      ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.lineTo(d.x-1,d.y+d.len);
+      ctx.strokeStyle = `rgba(116,185,255,${d.alpha})`; ctx.lineWidth = 1; ctx.stroke();
+      d.y += d.speed;
+      if (d.y > cvs.height+30) { d.y = -30; d.x = Math.random()*cvs.width; }
+    });
+    const W = cvs.width, H = cvs.height;
+    ctx.beginPath(); ctx.moveTo(0, H*0.5);
+    for (let x = 0; x < W; x++) {
+      const phase = (x/W*6+t)*Math.PI*2;
+      const beat = Math.sin(phase)*8*Math.max(0,1-Math.abs((x/W*6+t)%1-0.5)*3);
+      ctx.lineTo(x, H*0.5+beat);
+    }
+    ctx.strokeStyle = 'rgba(255,107,107,0.18)'; ctx.lineWidth = 2; ctx.stroke();
+    t += 0.004; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 4. BTS EDUCATION — falling pages */
+(function(){
+  const cvs = document.getElementById('c4'), ctx = cvs.getContext('2d');
+  let pages = [], t = 0;
+  function init() {
+    sizeCanvas(cvs); pages = [];
+    for (let i = 0; i < 22; i++) pages.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      w: 40+Math.random()*30, h: 50+Math.random()*40,
+      rot: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.005,
+      speed: 0.4+Math.random()*0.6, alpha: 0.04+Math.random()*0.1
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    pages.forEach(p => {
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+      ctx.strokeStyle = 'rgba(162,155,254,0.8)'; ctx.lineWidth = 1;
+      ctx.strokeRect(-p.w/2,-p.h/2,p.w,p.h);
+      for (let l = 0; l < 4; l++) {
+        ctx.beginPath();
+        ctx.moveTo(-p.w/2+4, -p.h/2+10+l*9);
+        ctx.lineTo(p.w/2-4,  -p.h/2+10+l*9);
+        ctx.strokeStyle = 'rgba(162,155,254,0.4)'; ctx.stroke();
+      }
+      ctx.restore();
+      p.y += p.speed; p.rot += p.rotSpeed;
+      if (p.y > cvs.height+60) { p.y = -60; p.x = Math.random()*cvs.width; }
+    });
+    ctx.save(); ctx.globalAlpha = 0.06; ctx.fillStyle = '#f9ca24';
+    const sx = cvs.width*0.85+Math.sin(t)*20, sy = cvs.height*0.3+Math.cos(t)*15;
+    ctx.beginPath(); ctx.ellipse(sx,sy,8,16,0.3,0,Math.PI*2); ctx.fill();
+    ctx.fillRect(sx-2,sy+16,4,30); ctx.restore();
+    t += 0.008; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 5. BLACKPINK — rose petals */
+(function(){
+  const cvs = document.getElementById('c5'), ctx = cvs.getContext('2d');
+  let petals = [];
+  function init() {
+    sizeCanvas(cvs); petals = [];
+    for (let i = 0; i < 70; i++) petals.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      r: 4+Math.random()*10, rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.03,
+      vx: (Math.random()-0.5)*0.5, vy: 0.4+Math.random()*0.8,
+      alpha: 0.05+Math.random()*0.18, hue: 340+Math.random()*30
+    });
+  }
+  function drawPetal(ctx, r) {
+    ctx.beginPath();
+    ctx.moveTo(0,-r); ctx.bezierCurveTo(r*0.8,-r*0.4,r*0.8,r*0.4,0,r);
+    ctx.bezierCurveTo(-r*0.8,r*0.4,-r*0.8,-r*0.4,0,-r);
+    ctx.closePath();
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    petals.forEach(p => {
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = `hsl(${p.hue},80%,70%)`; drawPetal(ctx,p.r); ctx.fill();
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotSpeed;
+      if (p.y > cvs.height+20) { p.y = -20; p.x = Math.random()*cvs.width; }
+    });
+    RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 6. TXT — butterflies + stars */
+(function(){
+  const cvs = document.getElementById('c6'), ctx = cvs.getContext('2d');
+  let stars = [], butterflies = [], t = 0;
+  function init() {
+    sizeCanvas(cvs); stars = []; butterflies = [];
+    for (let i = 0; i < 80; i++) stars.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      r: 0.5+Math.random()*2, twinkle: Math.random()*Math.PI*2, speed: 0.03+Math.random()*0.05
+    });
+    for (let i = 0; i < 12; i++) butterflies.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      phase: Math.random()*Math.PI*2, speed: 0.5+Math.random()*0.5, size: 8+Math.random()*14
+    });
+  }
+  function drawButterfly(ctx, s, t) {
+    const flap = Math.sin(t*4)*0.8;
+    ctx.save(); ctx.globalAlpha = 0.1; ctx.fillStyle = '#74b9ff';
+    ctx.beginPath(); ctx.ellipse(-s*0.6*Math.abs(Math.cos(flap)),0,s*0.9,s*0.5,flap*0.5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(s*0.6*Math.abs(Math.cos(flap)),0,s*0.9,s*0.5,-flap*0.5,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    stars.forEach(s => {
+      s.twinkle += s.speed;
+      const a = 0.2+Math.sin(s.twinkle)*0.2;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fill();
+    });
+    butterflies.forEach(b => {
+      b.x += Math.cos(b.phase)*b.speed*0.5;
+      b.y += Math.sin(b.phase*0.7)*b.speed*0.3;
+      b.phase += 0.01;
+      if (b.x < -30) b.x = cvs.width+30; if (b.x > cvs.width+30) b.x = -30;
+      if (b.y < -30) b.y = cvs.height+30; if (b.y > cvs.height+30) b.y = -30;
+      ctx.save(); ctx.translate(b.x,b.y); drawButterfly(ctx,b.size,t+b.phase); ctx.restore();
+    });
+    t += 0.02; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 7. TECHNIQUES — kaleidoscope */
+(function(){
+  const cvs = document.getElementById('c7'), ctx = cvs.getContext('2d');
+  let t = 0;
+  function init() { sizeCanvas(cvs); }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    const cx = cvs.width/2, cy = cvs.height/2, N = 8;
+    for (let s = 0; s < 5; s++) {
+      const r = 60+s*90;
+      for (let i = 0; i < N; i++) {
+        const a = t*0.3+i/N*Math.PI*2, a2 = t*0.3+(i+1)/N*Math.PI*2;
+        const hue = (i*45+t*20+s*30)%360;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a,a2); ctx.closePath();
+        ctx.fillStyle = `hsla(${hue},70%,55%,${0.025+s*0.008})`; ctx.fill();
+      }
+    }
+    t += 0.008; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 8. STRAY KIDS — mirror shards */
+(function(){
+  const cvs = document.getElementById('c8'), ctx = cvs.getContext('2d');
+  let shards = [];
+  function rnd(a,b) { return a+Math.random()*(b-a); }
+  function init() {
+    sizeCanvas(cvs); shards = [];
+    for (let i = 0; i < 30; i++) {
+      const n = 3+Math.floor(Math.random()*4), pts = [];
+      const cx = rnd(0,cvs.width), cy = rnd(0,cvs.height), r = rnd(15,55);
+      for (let j = 0; j < n; j++) pts.push({ a: j/n*Math.PI*2+rnd(-0.3,0.3), r: r*rnd(0.6,1.4) });
+      shards.push({ pts, cx, cy, alpha: rnd(0.03,0.12), vx: rnd(-0.2,0.2), vy: rnd(-0.3,0.3), rot: rnd(0,Math.PI*2), rotSpeed: rnd(-0.003,0.003) });
+    }
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    shards.forEach(s => {
+      ctx.save(); ctx.translate(s.cx,s.cy); ctx.rotate(s.rot);
+      ctx.beginPath();
+      s.pts.forEach((p,i) => {
+        const x = Math.cos(p.a)*p.r, y = Math.sin(p.a)*p.r;
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = `rgba(200,220,255,${s.alpha})`; ctx.fill();
+      ctx.strokeStyle = `rgba(255,255,255,${s.alpha*1.5})`; ctx.lineWidth = 0.8; ctx.stroke();
+      ctx.restore();
+      s.cx += s.vx; s.cy += s.vy; s.rot += s.rotSpeed;
+      if (s.cx < -80) s.cx = cvs.width+80; if (s.cx > cvs.width+80) s.cx = -80;
+      if (s.cy < -80) s.cy = cvs.height+80; if (s.cy > cvs.height+80) s.cy = -80;
+    });
+    RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 9. WHY IT MATTERS — network nodes */
+(function(){
+  const cvs = document.getElementById('c9'), ctx = cvs.getContext('2d');
+  let nodes = [];
+  function init() {
+    sizeCanvas(cvs); nodes = [];
+    for (let i = 0; i < 28; i++) nodes.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
+      r: 2+Math.random()*3, pulse: Math.random()*Math.PI*2
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i+1; j < nodes.length; j++) {
+        const dx = nodes[i].x-nodes[j].x, dy = nodes[i].y-nodes[j].y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 180) {
+          ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle = `rgba(224,64,251,${0.15*(1-dist/180)})`; ctx.lineWidth = 0.8; ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      n.pulse += 0.04;
+      const a = 0.2+Math.sin(n.pulse)*0.15;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r+4+Math.sin(n.pulse)*4,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(224,64,251,${0.06+Math.sin(n.pulse)*0.04})`; ctx.lineWidth = 1; ctx.stroke();
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > cvs.width)  n.vx *= -1;
+      if (n.y < 0 || n.y > cvs.height) n.vy *= -1;
+    });
+    RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 10. PERSONAL — ink brushstrokes */
+(function(){
+  const cvs = document.getElementById('c10'), ctx = cvs.getContext('2d');
+  let strokes = [], t = 0;
+  function init() {
+    sizeCanvas(cvs); strokes = [];
+    for (let i = 0; i < 18; i++) strokes.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      len: 80+Math.random()*200, angle: (Math.random()-0.5)*0.6,
+      w: 2+Math.random()*8, alpha: 0.03+Math.random()*0.09,
+      hue: 20+Math.random()*50, drift: (Math.random()-0.5)*0.3, speed: 0.2+Math.random()*0.5
+    });
+  }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    strokes.forEach(s => {
+      ctx.save(); ctx.translate(s.x,s.y); ctx.rotate(s.angle);
+      const g = ctx.createLinearGradient(0,0,s.len,0);
+      g.addColorStop(0,   `hsla(${s.hue},90%,65%,0)`);
+      g.addColorStop(0.3, `hsla(${s.hue},90%,65%,${s.alpha})`);
+      g.addColorStop(0.7, `hsla(${s.hue},90%,65%,${s.alpha})`);
+      g.addColorStop(1,   `hsla(${s.hue},90%,65%,0)`);
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(s.len,0);
+      ctx.strokeStyle = g; ctx.lineWidth = s.w; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.restore();
+      s.x += s.drift; s.y += s.speed;
+      if (s.y > cvs.height+50) { s.y = -50; s.x = Math.random()*cvs.width; }
+    });
+    ['\u201C','\u201D'].forEach((q,i) => {
+      const x = cvs.width*(0.1+i*0.8)+Math.sin(t+i)*15;
+      const y = cvs.height*0.2+Math.cos(t*0.7+i)*20;
+      ctx.save(); ctx.globalAlpha = 0.06; ctx.fillStyle = 'white';
+      ctx.font = 'bold 120px Georgia'; ctx.textAlign = 'center';
+      ctx.fillText(q,x,y); ctx.restore();
+    });
+    t += 0.01; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 11. DATA — matrix rain + constellation (canvas c11, slide index 10) */
+(function(){
+  const cvs = document.getElementById('c11'), ctx = cvs.getContext('2d');
+  let nodes = [], cols = [], t = 0;
+  const CHARS = '0123456789%+\u2500\u253C\u25CF\u25C9';
+  function init() {
+    sizeCanvas(cvs); nodes = []; cols = [];
+    for (let i = 0; i < 40; i++) nodes.push({
+      x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+      vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25,
+      r: 1+Math.random()*2.5, pulse: Math.random()*Math.PI*2
+    });
+    const colW = 28;
+    for (let x = 0; x < cvs.width; x += colW) cols.push({ x, y: Math.random()*cvs.height, speed: 1+Math.random()*2 });
+  }
+  function draw() {
+    ctx.fillStyle = 'rgba(6,6,18,0.18)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    ctx.font = '11px monospace';
+    cols.forEach(c => {
+      const ch = CHARS[Math.random()*CHARS.length|0];
+      ctx.fillStyle = 'rgba(85,239,196,0.12)';
+      ctx.fillText(ch,c.x,c.y);
+      c.y += c.speed;
+      if (c.y > cvs.height+20) c.y = -20;
+    });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i+1; j < nodes.length; j++) {
+        const dx = nodes[i].x-nodes[j].x, dy = nodes[i].y-nodes[j].y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 160) {
+          ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle = `rgba(116,185,255,${0.12*(1-dist/160)})`; ctx.lineWidth = 0.7; ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      n.pulse += 0.03;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(116,185,255,${0.3+Math.sin(n.pulse)*0.2})`; ctx.fill();
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > cvs.width)  n.vx *= -1;
+      if (n.y < 0 || n.y > cvs.height) n.vy *= -1;
+    });
+    t += 0.01; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 12. CONCLUSION — exploding starfield (canvas c12, slide index 11) */
+(function(){
+  const cvs = document.getElementById('c12'), ctx = cvs.getContext('2d');
+  let stars = [];
+  function init() {
+    sizeCanvas(cvs); stars = [];
+    const cx = cvs.width/2, cy = cvs.height/2;
+    for (let i = 0; i < 120; i++) {
+      const a = Math.random()*Math.PI*2, speed = 0.3+Math.random()*2;
+      stars.push({ x: cx, y: cy, vx: Math.cos(a)*speed, vy: Math.sin(a)*speed,
+        life: 0, maxLife: 150+Math.random()*200, r: 0.5+Math.random()*2,
+        hue: Math.random()*360, trail: [] });
+    }
+  }
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+    stars.forEach(s => {
+      s.trail.push({x:s.x,y:s.y});
+      if (s.trail.length > 8) s.trail.shift();
+      s.trail.forEach((pt,i) => {
+        const a = (i/s.trail.length)*0.12;
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,s.r*0.5,0,Math.PI*2);
+        ctx.fillStyle = `hsla(${s.hue},100%,70%,${a})`; ctx.fill();
+      });
+      const a = 0.6*(1-s.life/s.maxLife);
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `hsla(${s.hue},100%,80%,${a})`; ctx.fill();
+      s.x += s.vx; s.y += s.vy; s.vx *= 1.008; s.vy *= 1.008; s.life++;
+      if (s.life > s.maxLife || s.x < -50 || s.x > cvs.width+50 || s.y < -50 || s.y > cvs.height+50) {
+        const cx2 = cvs.width/2+(Math.random()-0.5)*80, cy2 = cvs.height/2+(Math.random()-0.5)*80;
+        const a2 = Math.random()*Math.PI*2, sp = 0.3+Math.random()*2;
+        s.x = cx2; s.y = cy2; s.vx = Math.cos(a2)*sp; s.vy = Math.sin(a2)*sp;
+        s.life = 0; s.hue = Math.random()*360; s.trail = [];
+      }
+    });
+    RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+
+/* 13. REFERENCES — orbital rings (canvas c13, slide index 12) */
+(function(){
+  const cvs = document.getElementById('c13'), ctx = cvs.getContext('2d');
+  let t = 0;
+  function init() { sizeCanvas(cvs); }
+  function draw() {
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    const cx = cvs.width/2, cy = cvs.height/2;
+    for (let i = 0; i < 8; i++) {
+      const r = 50+i*90, a = t*0.15+i*0.5;
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle = `rgba(249,202,36,${0.025+i*0.01})`; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx+Math.cos(a)*r, cy+Math.sin(a)*r, 2.5,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(249,202,36,0.3)'; ctx.fill();
+    }
+    t += 0.008; RAF(draw);
+  }
+  window.addEventListener('resize', init); init(); draw();
+})();
+</script>
+</body>
+</html>
