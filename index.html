@@ -11,7 +11,7 @@
   .slide {
     display: none; width: 100vw; height: 100vh; position: relative;
     overflow: hidden; flex-direction: column; justify-content: center;
-    align-items: center; padding: 40px 60px; text-align: center;
+    align-items: center; padding: 40px 60px 100px; text-align: center;
     animation: fadeIn 0.6s ease;
   }
   .slide.active { display: flex; }
@@ -62,21 +62,64 @@
   .highlight { color:#f9ca24; font-weight:900; }
   .pink { color:#ff6b6b; } .purple { color:#a29bfe; } .green { color:#55efc4; }
   .big-quote { font-family:'Bebas Neue',cursive; font-size:clamp(1.5rem,4vw,2.8rem); line-height:1.2; max-width:750px; margin:20px auto; }
+
+  /* ── NAV ── */
+  #ui-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 14px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    z-index: 300;
+    pointer-events: none;
+  }
+  #dotsBar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 360px;
+    pointer-events: all;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .dot.active { background: #f9ca24; transform: scale(1.4); }
   .nav {
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-    display:flex; align-items:center; gap:24px;
-    background:rgba(0,0,0,0.55); padding:10px 35px; border-radius:50px;
-    backdrop-filter:blur(12px); z-index:200; border:1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.55);
+    padding: 8px 18px;
+    border-radius: 50px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    pointer-events: all;
   }
   .nav button {
-    background:rgba(255,255,255,0.15); border:none; color:white; font-size:1rem;
-    padding:8px 16px; border-radius:30px; cursor:pointer; font-family:'Nunito',sans-serif;
-    font-weight:700; transition:background 0.2s;
+    background: rgba(255,255,255,0.15); border: none; color: white;
+    font-size: 0.9rem; padding: 7px 16px; border-radius: 30px; cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-weight: 700; transition: background 0.2s;
+    white-space: nowrap;
   }
-  .nav button:hover { background:rgba(255,255,255,0.3); }
-  .slide-counter { font-size:0.85rem; opacity:0.7; font-weight:700; min-width:60px; text-align:center; }
-  .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); cursor:pointer; transition:background 0.2s,transform 0.2s; }
-  .dot.active { background:#f9ca24; transform:scale(1.4); }
+  .nav button:hover { background: rgba(255,255,255,0.3); }
+  .nav .fs-btn { padding: 7px 12px; font-size: 1rem; }
+  .slide-counter {
+    font-size: 0.82rem; opacity: 0.75; font-weight: 700;
+    min-width: 52px; text-align: center;
+  }
+  .nav-sep {
+    width: 1px; height: 18px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
   .badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:0.75rem; font-weight:900; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; }
   .badge-bts { background:#4a0072; border:1px solid #a29bfe; color:#a29bfe; }
   .badge-bp  { background:#4a0000; border:1px solid #ff6b6b; color:#ff6b6b; }
@@ -251,7 +294,7 @@
   <p style="max-width:700px;">When I started listening to K-pop, I heard the beat first. Then I found the English line. Then I looked up a translation. And then, <span class="highlight">I realized these artists were writing about things no one around me was willing to say out loud.</span> That's the real power of K-pop lyrics — they make the unspeakable singable.</p>
 </div>
 
-<!-- SLIDE 11 — DATA (index 10, zero-based) -->
+<!-- SLIDE 11 — DATA -->
 <div class="slide s11">
   <canvas class="bg-canvas" id="c11"></canvas>
   <div class="tag">By the Numbers</div>
@@ -275,7 +318,7 @@
   </div>
 </div>
 
-<!-- SLIDE 12 — CONCLUSION (index 11, zero-based) -->
+<!-- SLIDE 12 — CONCLUSION -->
 <div class="slide s12">
   <canvas class="bg-canvas" id="c12"></canvas>
   <div class="tag">Conclusion</div>
@@ -289,7 +332,7 @@
   <p style="margin-top:16px;opacity:0.6;font-size:0.85rem;">KOR 3415 · Individual Presentation</p>
 </div>
 
-<!-- SLIDE 13 — REFERENCES (index 12, zero-based) -->
+<!-- SLIDE 13 — REFERENCES -->
 <div class="slide s13">
   <canvas class="bg-canvas" id="c13"></canvas>
   <div class="tag">References</div>
@@ -307,21 +350,24 @@
   </div>
 </div>
 
-<!-- NAV -->
-<div class="nav">
-  <button onclick="changeSlide(-1)">← Prev</button>
-  <span class="slide-counter" id="counter">1 / 13</span>
-  <button onclick="changeSlide(1)">Next →</button>
-  <button onclick="toggleFullscreen()">⛶</button>
+<!-- ── BOTTOM UI: dots on top, nav bar below ── -->
+<div id="ui-bottom">
+  <div id="dotsBar"></div>
+  <div class="nav">
+    <button onclick="changeSlide(-1)">← Prev</button>
+    <span class="slide-counter" id="counter">1 / 13</span>
+    <button onclick="changeSlide(1)">Next →</button>
+    <div class="nav-sep"></div>
+    <button class="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+  </div>
 </div>
-<div id="dotsBar" style="position:fixed;bottom:70px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:200;flex-wrap:wrap;max-width:320px;justify-content:center;"></div>
 
 <script>
 const slides = document.querySelectorAll('.slide');
 let cur = 0;
 const dotsBar = document.getElementById('dotsBar');
 const counter = document.getElementById('counter');
-const total = slides.length; // 13
+const total = slides.length;
 
 slides.forEach((_,i) => {
   const d = document.createElement('div');
@@ -330,16 +376,13 @@ slides.forEach((_,i) => {
   dotsBar.appendChild(d);
 });
 
-// DATA slide is index 10 (slide 11, zero-based), CONCLUSION is index 11
 const DATA_SLIDE_INDEX = 10;
-
 function animateBars() {
   document.querySelectorAll('.bar-fill').forEach(b => {
     b.style.width = '0%';
     setTimeout(() => b.style.width = b.dataset.w + '%', 80);
   });
 }
-
 function goTo(n) {
   slides[cur].classList.remove('active');
   dotsBar.children[cur].classList.remove('active');
@@ -349,7 +392,6 @@ function goTo(n) {
   counter.textContent = `${cur + 1} / ${total}`;
   if (cur === DATA_SLIDE_INDEX) animateBars();
 }
-
 function changeSlide(dir) { goTo(cur + dir); }
 
 document.addEventListener('keydown', e => {
@@ -357,7 +399,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   changeSlide(-1);
   if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen();
 });
-
 let tx = 0;
 document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
 document.addEventListener('touchend', e => {
@@ -366,13 +407,10 @@ document.addEventListener('touchend', e => {
 });
 
 const RAF = requestAnimationFrame;
-
 function sizeCanvas(canvas) {
   canvas.width  = canvas.parentElement.offsetWidth  || window.innerWidth;
   canvas.height = canvas.parentElement.offsetHeight || window.innerHeight;
 }
-
-/* 1. TITLE — floating music symbols */
 (function(){
   const cvs = document.getElementById('c1'), ctx = cvs.getContext('2d');
   const SYMBOLS = ['♪','♫','♩','♬','✦','★','◆'];
@@ -401,8 +439,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 2. INTRO — orbiting rings */
 (function(){
   const cvs = document.getElementById('c2'), ctx = cvs.getContext('2d');
   let t = 0;
@@ -430,8 +466,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 3. BTS MENTAL HEALTH — heartbeat + rain */
 (function(){
   const cvs = document.getElementById('c3'), ctx = cvs.getContext('2d');
   let t = 0, drops = [];
@@ -462,8 +496,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 4. BTS EDUCATION — falling pages */
 (function(){
   const cvs = document.getElementById('c4'), ctx = cvs.getContext('2d');
   let pages = [], t = 0;
@@ -493,16 +525,10 @@ function sizeCanvas(canvas) {
       p.y += p.speed; p.rot += p.rotSpeed;
       if (p.y > cvs.height+60) { p.y = -60; p.x = Math.random()*cvs.width; }
     });
-    ctx.save(); ctx.globalAlpha = 0.06; ctx.fillStyle = '#f9ca24';
-    const sx = cvs.width*0.85+Math.sin(t)*20, sy = cvs.height*0.3+Math.cos(t)*15;
-    ctx.beginPath(); ctx.ellipse(sx,sy,8,16,0.3,0,Math.PI*2); ctx.fill();
-    ctx.fillRect(sx-2,sy+16,4,30); ctx.restore();
     t += 0.008; RAF(draw);
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 5. BLACKPINK — rose petals */
 (function(){
   const cvs = document.getElementById('c5'), ctx = cvs.getContext('2d');
   let petals = [];
@@ -536,8 +562,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 6. TXT — butterflies + stars */
 (function(){
   const cvs = document.getElementById('c6'), ctx = cvs.getContext('2d');
   let stars = [], butterflies = [], t = 0;
@@ -579,8 +603,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 7. TECHNIQUES — kaleidoscope */
 (function(){
   const cvs = document.getElementById('c7'), ctx = cvs.getContext('2d');
   let t = 0;
@@ -601,8 +623,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 8. STRAY KIDS — mirror shards */
 (function(){
   const cvs = document.getElementById('c8'), ctx = cvs.getContext('2d');
   let shards = [];
@@ -637,8 +657,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 9. WHY IT MATTERS — network nodes */
 (function(){
   const cvs = document.getElementById('c9'), ctx = cvs.getContext('2d');
   let nodes = [];
@@ -677,8 +695,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 10. PERSONAL — ink brushstrokes */
 (function(){
   const cvs = document.getElementById('c10'), ctx = cvs.getContext('2d');
   let strokes = [], t = 0;
@@ -706,22 +722,13 @@ function sizeCanvas(canvas) {
       s.x += s.drift; s.y += s.speed;
       if (s.y > cvs.height+50) { s.y = -50; s.x = Math.random()*cvs.width; }
     });
-    ['\u201C','\u201D'].forEach((q,i) => {
-      const x = cvs.width*(0.1+i*0.8)+Math.sin(t+i)*15;
-      const y = cvs.height*0.2+Math.cos(t*0.7+i)*20;
-      ctx.save(); ctx.globalAlpha = 0.06; ctx.fillStyle = 'white';
-      ctx.font = 'bold 120px Georgia'; ctx.textAlign = 'center';
-      ctx.fillText(q,x,y); ctx.restore();
-    });
     t += 0.01; RAF(draw);
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 11. DATA — matrix rain + constellation (canvas c11, slide index 10) */
 (function(){
   const cvs = document.getElementById('c11'), ctx = cvs.getContext('2d');
-  let nodes = [], cols = [], t = 0;
+  let nodes = [], cols = [];
   const CHARS = '0123456789%+\u2500\u253C\u25CF\u25C9';
   function init() {
     sizeCanvas(cvs); nodes = []; cols = [];
@@ -761,12 +768,10 @@ function sizeCanvas(canvas) {
       if (n.x < 0 || n.x > cvs.width)  n.vx *= -1;
       if (n.y < 0 || n.y > cvs.height) n.vy *= -1;
     });
-    t += 0.01; RAF(draw);
+    RAF(draw);
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 12. CONCLUSION — exploding starfield (canvas c12, slide index 11) */
 (function(){
   const cvs = document.getElementById('c12'), ctx = cvs.getContext('2d');
   let stars = [];
@@ -805,8 +810,6 @@ function sizeCanvas(canvas) {
   }
   window.addEventListener('resize', init); init(); draw();
 })();
-
-/* 13. REFERENCES — orbital rings (canvas c13, slide index 12) */
 (function(){
   const cvs = document.getElementById('c13'), ctx = cvs.getContext('2d');
   let t = 0;
@@ -827,13 +830,8 @@ function sizeCanvas(canvas) {
 })();
 
 function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  }
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else if (document.exitFullscreen) document.exitFullscreen();
 }
 </script>
 </body>
